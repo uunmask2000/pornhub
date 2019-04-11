@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 # 'https://www.pornhub.com/video?c=111&o=cm&hd=1&max_duration=30&page=2'
 
 Host = "https://www.pornhub.com/view_video.php?viewkey="
-Main_url = 'https://www.pornhub.com/video?o=tr&min_duration=20'
+Main_url = 'https://www.pornhub.com/video?o=ht'
 Host_name = 'pornhub'
 
 
@@ -220,6 +220,7 @@ def data_list(url):
         href_ = h_.find('a').get('href')
         title_ = h_.find('a').get('title')
         img_ = h_.find('a').find('img').get('data-src')
+
         key_1 = href_.replace('/view_video.php?viewkey=', '')
         key_ = pas_(href_, 'viewkey')
         # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
@@ -235,9 +236,15 @@ def data_list(url):
         global pornhub_path_j
         path_v = pornhub_path_v + str(key_) + str(ext)
         path_j = pornhub_path_j + str(key_) + '.json'
-        path_i = pornhub_path_i + str(key_) + os.path.splitext(img_)[1]
 
-        # print(path_v)
+        try:
+            # pass
+            path_i = pornhub_path_i + str(key_) + os.path.splitext(img_)[1]
+        except:
+            # pass
+            path_i = pornhub_path_i + str(key_) + str('.jpg')
+
+            # print(path_v)
         res = True
         if url_ == False:
             print('找不到網址 :' + str(href_))
@@ -263,6 +270,8 @@ def data_list(url):
 
 
 def do_create_img(content, img_name):
+    if content is None:
+        return False
     # with open(img_name, 'wb') as file:  # 以byte的形式將圖片數據寫入
     #     file.write(content)
     #     file.flush()
@@ -302,15 +311,15 @@ mkdir_m(pornhub_path_j_)
 pornhub_path_i_ = path + 'images/' + Host_name + '/'
 mkdir_m(pornhub_path_i_)
 
-pornhub_path_v = pornhub_path_v_ + '/'
+pornhub_path_v = pornhub_path_v_
 mkdir_m(pornhub_path_v)
-pornhub_path_j = pornhub_path_j_ + '/'
+pornhub_path_j = pornhub_path_j_
 mkdir_m(pornhub_path_j)
-pornhub_path_i = pornhub_path_i_ + '/'
+pornhub_path_i = pornhub_path_i_
 mkdir_m(pornhub_path_i)
 
 # 評到
-chanel = 111
+chanel = 105
 # 重跑次數
 Re_row = 0
 
