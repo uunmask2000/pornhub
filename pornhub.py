@@ -26,6 +26,9 @@ Host = "https://www.pornhub.com/view_video.php?viewkey="
 Main_url = 'https://www.pornhub.com/video?o=ht'
 Host_name = 'pornhub'
 
+_s = [1, 2, 241]
+# -------------------------------
+
 
 def on_proxies():
     str_ = "{}://{}:{}"
@@ -146,6 +149,7 @@ def json_dict():
         'grade': "",  # 分數
         'mins': "",
         'source_url': "",
+        'source_url_old': "",
         'resolution': "",
         'part': "",
         'intro': ""
@@ -159,7 +163,6 @@ def parseURL(ph_key, _type=1):
     url = Host + ph_key
     # print(url)
     dom = requests.get(url).content
-
     #     result = re.search(
     #         '"quality":"720","videoUrl":"(.*?)"},', dom.decode("utf-8"))
     try:
@@ -183,9 +186,6 @@ def download(url, filename, chunk_count):
 
 
 def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
-    # print(title)
-    # print(V_path)
-    # print(url)
     json_dict_ = json_dict()
     t = create_time()
     json_dict_['name'] = title
@@ -193,8 +193,9 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
     json_dict_['sig'] = create_sign(t)
     json_dict_['source_url'] = V_path
     json_dict_['cover_url'] = i_path
+    json_dict_['source_url_old'] = url
     # 下載影片
-    download(url, V_path,  10)
+    download(url, V_path,  random.randint(1, 10))
     # 下載json
     write_json_file(json_dict_, j_path)
     return True
@@ -205,14 +206,8 @@ def data_list(url):
     if soup == False:
         time.sleep(60)
         return False
-    else:
-        pass
     # print(soup)
-    # no use
-    # div = soup.find('div', {'class': 'nf-videos'})
-    # hi = div.find('h1').text
-    # no use
-    # print(str(hi)) wrap + phimage
+    # ##
     div_wrap = soup.find_all('div', {'class': 'phimage'})
     # print(div_wrap)
     # print(len(div_wrap))
@@ -256,13 +251,7 @@ def data_list(url):
             print('找不到網址 :' + str(href_))
             continue
         else:
-            # res = True
-            # res = True
-            # print(str(title_))
             res = True
-            # 抓圖片
-            # print(img_)
-            # print(os.path.splitext(img_))
             do_create_img(img_, path_i)
             singe_2_download_2json(
                 title_, path_v, path_j, str(url_), str(path_i))
@@ -288,6 +277,7 @@ def pas_(url, key):
     return data
 
 
+# ------------------------------------------------------------------------------
 # 先建立資料夾
 path = 'path/'
 mkdir_m(path)
@@ -302,7 +292,6 @@ pathV = path + 'videos/'
 mkdir_m(pathV)
 pathI = path + 'images/'
 mkdir_m(pathI)
-
 
 ###
 pornhub_path_v_ = path + 'videos/' + Host_name + '/'
@@ -382,37 +371,45 @@ class myThread (threading.Thread):
         print("退出线程：" + self.name)
 
 
-if __name__ == '__main__':
-    # # 依 CPU 數量建立 child process
-    # pool = Pool()
-    # __let = [1, 2, 241]
-    # for ii in __let:
-    #     # print(ii)
-    #     _ii = int(ii)
-    #     pool.map(run_pool, (_ii,))
-    #     pass
-    # pool.map(f, range(len(__let)))
+def r1():
+    # guard(1, 1000000)
+    return True
 
+
+def r2():
     threadLock = threading.Lock()
     threads = []
+    global _s
+    __let = _s
+    _i = 0
+    for rows in __let:
+        thread = myThread(_i, "Thread-"+str(_i), rows)
+        thread.start()
+        threads.append(thread)
+        _i += 1
     # 创建新线程
-    thread1 = myThread(1, "Thread-1", 1)
-    thread2 = myThread(2, "Thread-2", 2)
-    thread3 = myThread(3, "Thread-3", 241)
-
+    # thread1 = myThread(1, "Thread-1", 1)
+    # thread2 = myThread(2, "Thread-2", 2)
+    # thread3 = myThread(3, "Thread-3", 241)
     # 开启新线程
-    thread1.start()
-    thread2.start()
-    thread3.start()
+    # thread1.start()
+    # thread2.start()
+    # thread3.start()
     # 添加线程到线程列表
-    threads.append(thread1)
-    threads.append(thread2)
-    threads.append(thread3)
+    # threads.append(thread1)
+    # threads.append(thread2)
+    # threads.append(thread3)
     # 等待所有线程完成
     for t in threads:
         t.join()
     print("退出主线程")
     while True:
         pass
-# ------------------------
-#         os.getpid(), id(sys.stdout), __name__))
+    return True
+
+
+if __name__ == '__main__':
+    # 單線程
+    # r1()
+    # 多線程
+    r2()
