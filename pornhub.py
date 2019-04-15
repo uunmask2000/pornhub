@@ -14,7 +14,8 @@ from pget.down import Downloader
 from urllib.request import urlretrieve
 from urllib.parse import urlparse
 
-
+import threading
+import time
 ##
 
 
@@ -347,24 +348,71 @@ def guard(start, range_):
     Re_row += 1
     print('重跑一次' + str(Re_row))
     # return guard(start, range_)
+# ----------------------
 
 
-# 跑兩頁
-guard(1, 100)
-# parseURL('ph5b54a7eb7d21c')
+def run_pool(x):
+    MAX = 5
+    Main_url = 'https://www.pornhub.com/video?c={}&page={}'
+    i = 0
+    while True:
+        if i > MAX:
+            return True
+        i += 1
+        _url = Main_url.format(x, i)
+        # print(_url)
+        res = data_list(_url)
+        pass
+    print('跑完' + str(Re_row))
+    return True
 
-# https://www.pornhub.com/video?c=111&o=cm&hd=1&max_duration=20
-# https://www.pornhub.com/video?c=111&o=cm&hd=1&max_duration=30&page=1- 10
-# _url = 'https://www.pornhub.com/video?c=111&page=2'
-# res = data_list(_url)
 
-# if res:
-#     print('END')
-# else:
-#     print('ERROR')
+###
+class myThread (threading.Thread):
+    def __init__(self, threadID, name, counter):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.counter = counter
+
+    def run(self):
+        print("开始线程：" + self.name)
+        run_pool(self.counter)
+        # print_time(self.name, self.counter, 5)
+        print("退出线程：" + self.name)
 
 
-# _url = 'https://www.pornhub.com/video?c=111&page=2'
-# html = requests.get(_url).content
-# soup = BeautifulSoup(html, 'html.parser')
-# print(soup
+if __name__ == '__main__':
+    # # 依 CPU 數量建立 child process
+    # pool = Pool()
+    # __let = [1, 2, 241]
+    # for ii in __let:
+    #     # print(ii)
+    #     _ii = int(ii)
+    #     pool.map(run_pool, (_ii,))
+    #     pass
+    # pool.map(f, range(len(__let)))
+
+    threadLock = threading.Lock()
+    threads = []
+    # 创建新线程
+    thread1 = myThread(1, "Thread-1", 1)
+    thread2 = myThread(2, "Thread-2", 2)
+    thread3 = myThread(3, "Thread-3", 241)
+
+    # 开启新线程
+    thread1.start()
+    thread2.start()
+    thread3.start()
+    # 添加线程到线程列表
+    threads.append(thread1)
+    threads.append(thread2)
+    threads.append(thread3)
+    # 等待所有线程完成
+    for t in threads:
+        t.join()
+    print("退出主线程")
+    while True:
+        pass
+# ------------------------
+#         os.getpid(), id(sys.stdout), __name__))
