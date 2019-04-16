@@ -73,8 +73,9 @@ def get_soup(url, c=1):
     # logging.info('get_soup herf' + url)
     # 嚴重錯誤
     if _error_row > 5:
-        print('嚴重錯誤 大於五次')
-        os._exit(0)
+        # print('嚴重錯誤 大於五次')
+        # os._exit(0)
+        pass
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
@@ -101,8 +102,9 @@ def get_soup(url, c=1):
                                 proxies=proxies, timeout=1).content
             soup = BeautifulSoup(html, 'html.parser')
         except:
-            time.sleep(5)
-            # get_soup(url, c)
+            time.sleep(10)
+            # print('重新')
+            get_soup(url, c)
             # # print("Was a nice sleep, now let me continue...")
             continue
     # try:
@@ -252,7 +254,7 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
     write_json_file(json_dict_, j_path)
     global _movie_row
     _movie_row += 1
-    print(_movie_row)
+    print('下載完成' + str(_movie_row))
     return True
 
 
@@ -282,8 +284,9 @@ def data_list(url):
         _d = h_.find(
             'div', {'class': 'marker-overlays js-noFade'}).find('var').text.split(':', 1)
         # print(_d)
-        if int(_d[0]) < 20:
-            print('低於20分')
+        if int(_d[0]) < 5:
+            pass
+            # print('低於20分')
         else:
             key_1 = href_.replace('/view_video.php?viewkey=', '')
             key_ = pas_(href_, 'viewkey')
@@ -514,7 +517,7 @@ def r2():
 
 def r3():
     global Home_url
-    MAX_t = 5
+    MAX_t = 10
     ##
     threads = []
 
@@ -527,7 +530,7 @@ def r3():
         t = threading.Thread(target=run_pool_2, args=(_s, _e,))
         threads.append(t)
         t.start()
-        print(r)
+        # print(r)
     for t in threads:
         t.join()
     print("退出主线程")
