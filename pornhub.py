@@ -225,7 +225,11 @@ def download(url, filename, chunk_count):
         return False
     else:
         print(str(filename))
-        downloader = Downloader(url, filename, chunk_count)
+        proxies = {}
+        # proxies['http'] = on_proxies()
+        proxies['https'] = _proxy()
+        downloader = Downloader(
+            url, filename, chunk_count,  high_speed=False, headers=None, proxies=proxies)
         downloader.start_sync()
     return True
 
