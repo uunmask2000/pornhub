@@ -259,10 +259,11 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
 
 
 def data_list(url):
+    print(url)
     soup = get_soup(url)
     if soup == False:
         time.sleep(1)
-        data_list(url)
+        # data_list(url)
         return False
     # print(soup)
     _se = soup.find('body').text.strip().replace("", "")
@@ -402,7 +403,8 @@ def guard(start, range_):
             i)
         # _url = 'https://www.pornhub.com/video?c={}&max_duration=20&page={}'.format(
         #     chanel, i)
-        print(_url)
+        time.sleep(1)
+        # print(_url)
         res = data_list(_url)
         # if res:
         #     print('END' + str(i))
