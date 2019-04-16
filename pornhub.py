@@ -517,13 +517,14 @@ def r2():
 
 def r3():
     global Home_url
-    MAX_t = 10
+    Min_t = 10
+    MAX_t = 20
     ##
     threads = []
 
     # 0*10 + 1  ~ 1*10
     # 1*10 + 1  ~ 2*10
-    for r in range(1, MAX_t):
+    for r in range(Min_t, MAX_t):
         _s = r * 10 + 1
         _e = (r+1)*10
         ##
