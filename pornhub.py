@@ -28,6 +28,7 @@ import urllib.request
 
 Host = "https://www.pornhub.com/view_video.php?viewkey="
 Main_url = 'https://www.pornhub.com/video?o=ht'
+Home_url = 'https://www.pornhub.com/'
 Host_name = 'pornhub'
 
 # 下載數量
@@ -96,6 +97,9 @@ def get_soup(url, c=1):
         try:
             html = requests.get(url, headers=headers, proxies=proxies).content
             soup = BeautifulSoup(html, 'html.parser')
+            if soup is None:
+                time.sleep(1)
+                get_soup(url, c)
             # break
         except:
             print("Connection refused by the server..")
@@ -303,6 +307,7 @@ def data_list(url):
             continue
         else:
             res = True
+            print('找網址 :' + str(href_))
             do_create_img(img_, path_i)
             singe_2_download_2json(
                 title_, path_v, path_j, str(url_), str(path_i))
@@ -407,24 +412,33 @@ def run_pool(x):
     return True
 
 
+def run_pool_2(x, y):
+    Main_url = 'https://www.pornhub.com/video?page={}'
+    for r in range(x, y+1):
+        _url = Main_url.format(r)
+        print(_url)
+        # time.sleep(5)
+        res = data_list(_url)
+    return True
+
 ###
+
+
 class myThread (threading.Thread):
-    def __init__(self, threadID, name, counter):
+    def __init__(self, threadID, name, s):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
-        self.counter = counter
+        self.s = s
+        self.e = s
 
     def run(self):
         print("开始线程：" + self.name)
-        run_pool(self.counter)
-        # print_time(self.name, self.counter, 5)
+        run_pool_2(self.s,  self.e)
         print("退出线程：" + self.name)
 
 
 # ffmpeng 需要安裝
-# 影片路徑
-path = 'TEST'
 
 
 def video_time(file_name):
@@ -485,8 +499,42 @@ def r2():
     return True
 
 
+def r3():
+    global Home_url
+    MAX_t = 5
+    ##
+    threads = []
+
+    # 0*10 + 1  ~ 1*10
+    # 1*10 + 1  ~ 2*10
+    for r in range(1, MAX_t):
+        _s = r * 10 + 1
+        _e = (r+1)*10
+        ##
+        t = threading.Thread(target=run_pool_2, args=(_s, _e,))
+        threads.append(t)
+        t.start()
+        print(r)
+    for t in threads:
+        t.join()
+    print("退出主线程")
+    while True:
+        pass
+
+    # https://www.pornhub.com/video?page=1
+
+    # https://www.pornhub.com/video?page=101
+
+    # https://www.pornhub.com/video?page=201
+
+    return True
+
+
 if __name__ == '__main__':
     # 單線程
     # r1()
     # 多線程
-    r2()
+    # r2()
+    # 多線程 首頁
+    r3()
+    print('run')
