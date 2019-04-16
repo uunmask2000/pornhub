@@ -226,13 +226,13 @@ def download(url, filename, chunk_count):
     if os.path.isfile(filename):
         return False
     else:
-        # print(str(filename))
+        print(str(filename))
         proxies = {}
         # proxies['http'] = on_proxies()
         proxies['https'] = _proxy()
         ###
         # downloader = Downloader(url, filename, chunk_count, high_speed=True, headers=None, proxies=proxies)
-        downloader = Downloader(url, filename, chunk_count)
+        downloader = Downloader(url, filename, chunk_count, True)
         downloader.start_sync()
     return True
 
@@ -261,7 +261,7 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
 def data_list(url):
     soup = get_soup(url)
     if soup == False:
-        time.sleep(60)
+        time.sleep(1)
         data_list(url)
         return False
     # print(soup)
@@ -286,7 +286,9 @@ def data_list(url):
         # print(_d)
         if int(_d[0]) < 5:
             pass
-            # print('低於20分')
+            # print('低於5分')
+        elif int(_d[0]) > 90:
+            pass
         else:
             key_1 = href_.replace('/view_video.php?viewkey=', '')
             key_ = pas_(href_, 'viewkey')
@@ -433,7 +435,7 @@ def run_pool_2(x, y):
     for r in range(x, y+1):
         _url = Main_url.format(r)
         print(_url)
-        # time.sleep(5)
+        time.sleep(1)
         res = data_list(_url)
     return True
 
@@ -517,8 +519,8 @@ def r2():
 
 def r3():
     global Home_url
-    Min_t = 10
-    MAX_t = 20
+    Min_t = 15
+    MAX_t = 25
     ##
     threads = []
 
