@@ -44,14 +44,14 @@ _s = [111]
 
 def on_proxies():
     str_ = "{}://{}:{}"
-    url = 'https://raw.githubusercontent.com/stamparm/aux/master/fetch-some-list.txt'
-    r = requests.get(url)
-    json_ = r.json()
-    proxies_ = get_dict('http', json_)
-    proxies = proxies_[0]
-    # str_ = proxies['proto'] + "://"
-    str_ = str(proxies['proto']) + "://" + \
-        str(proxies['ip']) + ":" + str(proxies['port'])
+    # url = 'https://raw.githubusercontent.com/stamparm/aux/master/fetch-some-list.txt'
+    # r = requests.get(url)
+    # json_ = r.json()
+    # proxies_ = get_dict('http', json_)
+    # proxies = proxies_[0]
+    # # str_ = proxies['proto'] + "://"
+    # str_ = str(proxies['proto']) + "://" + \
+    #     str(proxies['ip']) + ":" + str(proxies['port'])
 
     return str_
 
@@ -98,19 +98,12 @@ def get_soup(url, c=1):
     while html == '':
         try:
             html = requests.get(url, headers=headers,
-                                proxies=proxies, timeout=5).content
+                                proxies=proxies, timeout=1).content
             soup = BeautifulSoup(html, 'html.parser')
-            if soup is None:
-                time.sleep(5)
-                get_soup(url, c)
-            # break
         except:
-            # print("Connection refused by the server..")
-            # print("Let me sleep for 5 seconds")
-            # print("ZZzzzz...")
             time.sleep(5)
-            get_soup(url, c)
-            # print("Was a nice sleep, now let me continue...")
+            # get_soup(url, c)
+            # # print("Was a nice sleep, now let me continue...")
             continue
     # try:
     #     with urllib.request.urlopen(url) as response:
@@ -555,40 +548,24 @@ def _c_():
 
 
 def _proxy():
+    _proxy_list = []
     _url = 'https://www.us-proxy.org/'
     html = requests.get(_url).content
     soup = BeautifulSoup(html, 'html.parser')
     _s = ""
     _tbody = soup.find('table').find('tbody')
-    for tr in _tbody.find_all('tr'):
+    _tr = _tbody.find_all('tr')
+    # print(len(_tr))
+    for tr in _tr:
+        # print(tr)
+        # print(len(tr))
         td_ = tr.find_all('td')
-        if td_[6].text == 'yes':
+        if td_[6].text == 'yes' and td_[4].text == 'anonymous':
             _s = str('https://' + td_[0].text + ':' + td_[1].text)
-            break
-        # print(td_[0].text)
-        # print(td_[1].text)
-        # print(td_[5].text)
-        # print(td_[6].text) # http
-        # print(td_[7].text)
-
-    # json_ = r.json()
-    # LISTA = json_[0]['LISTA']
-    # # print(LISTA)
-    # rand_item = random.choice(LISTA)
-    # while rand_item['ANON'] != 'Elite':
-    #     rand_item = random.choice(LISTA)
-    # # print(rand_item)
-    # return _proxy_(rand_item)
-    # print(json_[0]['LISTA'])
+            _proxy_list.append(_s)
+    ####
+    _s = random.choice(_proxy_list)
     # print(_s)
-    return _s
-
-
-def _proxy_(json):
-    # Https = {
-    #     "https":  str('https://' + json['IP'] + ':' + json['PORT'])
-    # }
-    _s = str('https://' + json['IP'] + ':' + json['PORT'])
     return _s
 
 
