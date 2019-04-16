@@ -1,3 +1,6 @@
+from subprocess import check_output
+from glob import glob
+from os.path import join
 import requests
 import lxml
 import re
@@ -17,6 +20,7 @@ from urllib.parse import urlparse
 import threading
 import time
 ##
+import urllib.request
 
 
 ###
@@ -26,7 +30,13 @@ Host = "https://www.pornhub.com/view_video.php?viewkey="
 Main_url = 'https://www.pornhub.com/video?o=ht'
 Host_name = 'pornhub'
 
-_s = [1, 2, 241]
+# 下載數量
+_movie_row = 0
+# 錯誤次數
+_error_row = 0
+
+
+_s = [111]
 # -------------------------------
 
 
@@ -57,7 +67,13 @@ def get_dict(key, dict_):
 
 
 def get_soup(url, c=1):
+    global _error_row
     # logging.info('get_soup herf' + url)
+    # 嚴重錯誤
+    if _error_row > 5:
+        print('嚴重錯誤 大於五次')
+        os._exit()
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
     }
@@ -67,6 +83,7 @@ def get_soup(url, c=1):
     proxies['http'] = on_proxies()
     # 錯誤三次
     if c > 3:
+        _error_row += 1
         return False
     else:
         pass
@@ -74,19 +91,47 @@ def get_soup(url, c=1):
     ##
     html = ''
     soup = False
+
     while html == '':
         try:
             html = requests.get(url, headers=headers, proxies=proxies).content
             soup = BeautifulSoup(html, 'html.parser')
-            break
+            # break
         except:
             print("Connection refused by the server..")
             print("Let me sleep for 5 seconds")
             print("ZZzzzz...")
             time.sleep(1)
-            # get_soup(url, c)
+            get_soup(url, c)
             print("Was a nice sleep, now let me continue...")
             continue
+    # try:
+    #     with urllib.request.urlopen(url) as response:
+    #         # use whatever encoding as per the webpage
+    #         html = response.read().decode('utf-8')
+    #         print(html)
+    # except urllib.request.HTTPError as e:
+    #     if e.code == 404:
+    #         print(f"{url} is not found")
+    #     elif e.code == 503:
+    #         print(f'{url} base webservices are not available')
+    #         # can add authentication here
+    #     else:
+    #         print('http error', e)
+    # -----------------------------
+    # html = requests.get(url, headers=headers, proxies=proxies).content
+    # while True:
+    #     soup = BeautifulSoup(html, 'html.parser')
+    #     body = soup.find('body').text
+    #     # print(body)
+    #     if str(body).find('loading...') > 1:
+    #         print(body.text)
+    #         break
+    #     time.sleep(3)
+    #     html = requests.get(url, headers=headers, proxies=proxies).content
+    #     soup = BeautifulSoup(html, 'html.parser')
+    #     # print(soup)
+
     return soup
 
 
@@ -195,9 +240,14 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
     json_dict_['cover_url'] = i_path
     json_dict_['source_url_old'] = url
     # 下載影片
-    download(url, V_path,  random.randint(1, 10))
+    download(url, V_path,  random.randint(5, 10))
+    # 檢查 影片
+    json_dict_['mins'] = video_time(V_path)
     # 下載json
     write_json_file(json_dict_, j_path)
+    global _movie_row
+    _movie_row += 1
+    print(_movie_row)
     return True
 
 
@@ -205,9 +255,10 @@ def data_list(url):
     soup = get_soup(url)
     if soup == False:
         time.sleep(60)
+        data_list(url)
         return False
     # print(soup)
-    # ##
+    # ## videoPreviewBg
     div_wrap = soup.find_all('div', {'class': 'phimage'})
     # print(div_wrap)
     # print(len(div_wrap))
@@ -243,12 +294,12 @@ def data_list(url):
             # print(path_v)
         res = True
         if url_ == False:
-            print('找不到網址 :' + str(href_))
+            # print('找不到網址 :' + str(href_))
             # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
             res = False
             continue
         elif ext != '.mp4':
-            print('找不到網址 :' + str(href_))
+            # print('找不到網址 :' + str(href_))
             continue
         else:
             res = True
@@ -328,7 +379,7 @@ def guard(start, range_):
             i)
         # _url = 'https://www.pornhub.com/video?c={}&max_duration=20&page={}'.format(
         #     chanel, i)
-        # print(_url)
+        print(_url)
         res = data_list(_url)
         # if res:
         #     print('END' + str(i))
@@ -341,7 +392,7 @@ def guard(start, range_):
 
 
 def run_pool(x):
-    MAX = 5
+    MAX = 999
     Main_url = 'https://www.pornhub.com/video?c={}&page={}'
     i = 0
     while True:
@@ -349,7 +400,7 @@ def run_pool(x):
             return True
         i += 1
         _url = Main_url.format(x, i)
-        # print(_url)
+        print(_url)
         res = data_list(_url)
         pass
     print('跑完' + str(Re_row))
@@ -369,6 +420,32 @@ class myThread (threading.Thread):
         run_pool(self.counter)
         # print_time(self.name, self.counter, 5)
         print("退出线程：" + self.name)
+
+
+# ffmpeng 需要安裝
+# 影片路徑
+path = 'TEST'
+
+
+def video_time(file_name):
+    # file_name = "TEST\ph5a8b7ec93d417.mp4"
+
+    try:
+        a = str(check_output('ffprobe -i  "'+file_name +
+                             '" 2>&1 |findstr "Duration"', shell=True))
+    except:
+        os.remove(file_name)
+        print('刪除')
+        return 0
+    # For Windows
+
+    # For Linux
+    # a = str(check_output('ffprobe -i  "'+file_name+'" 2>&1 |grep "Duration"',shell=True))
+    a = a.split(",")[0].split("Duration:")[1].strip()
+    h, m, s = a.split(':')
+    duration = int(h) * 3600 + int(m) * 60 + float(s)
+    # print(duration)
+    return duration
 
 
 def r1():
