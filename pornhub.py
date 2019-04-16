@@ -10,6 +10,7 @@ import os
 import hashlib
 import random
 import datetime
+import sys
 
 from urllib import parse
 from bs4 import BeautifulSoup
@@ -72,16 +73,18 @@ def get_soup(url, c=1):
     # logging.info('get_soup herf' + url)
     # 嚴重錯誤
     if _error_row > 5:
-        print('嚴重錯誤 大於五次')
-        os._exit()
+        # print('嚴重錯誤 大於五次')
+        # os._exit(0)
+        pass
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
     }
-    proxies = {
-        "http":  ""
-    }
-    proxies['http'] = on_proxies()
+    proxies = {}
+    # proxies['http'] = on_proxies()
+    proxies['https'] = _proxy()
+    # proxies['https'] = 'https://206.189.165.149:3128'
+
     # 錯誤三次
     if c > 3:
         _error_row += 1
@@ -92,22 +95,23 @@ def get_soup(url, c=1):
     ##
     html = ''
     soup = False
-
+    print(proxies)
     while html == '':
         try:
-            html = requests.get(url, headers=headers, proxies=proxies).content
+            html = requests.get(url, headers=headers,
+                                proxies=proxies, timeout=5).content
             soup = BeautifulSoup(html, 'html.parser')
             if soup is None:
-                time.sleep(1)
+                time.sleep(5)
                 get_soup(url, c)
             # break
         except:
-            print("Connection refused by the server..")
-            print("Let me sleep for 5 seconds")
-            print("ZZzzzz...")
-            time.sleep(1)
+            # print("Connection refused by the server..")
+            # print("Let me sleep for 5 seconds")
+            # print("ZZzzzz...")
+            time.sleep(5)
             get_soup(url, c)
-            print("Was a nice sleep, now let me continue...")
+            # print("Was a nice sleep, now let me continue...")
             continue
     # try:
     #     with urllib.request.urlopen(url) as response:
@@ -262,6 +266,13 @@ def data_list(url):
         data_list(url)
         return False
     # print(soup)
+    _se = soup.find('body').text.strip().replace("", "")
+    # print(_se)
+    _ss = 'Loading ...'
+    if _se == _ss:
+        print('異常')
+        # raise Exception('異常')
+        sys.exit(0)
     # ## videoPreviewBg
     div_wrap = soup.find_all('div', {'class': 'phimage'})
     # print(div_wrap)
@@ -271,46 +282,51 @@ def data_list(url):
         href_ = h_.find('a').get('href')
         title_ = h_.find('a').get('title')
         img_ = h_.find('a').find('img').get('data-src')
-
-        key_1 = href_.replace('/view_video.php?viewkey=', '')
-        key_ = pas_(href_, 'viewkey')
-        # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
-        # print(str(title_))
-        url_ = parseURL(key_)
-        ##
-        u = urlparse(url_)
-        ext = os.path.splitext(u.path)[1]
-
-        # print(u.path)
-        ##
-        global pornhub_path_v
-        global pornhub_path_j
-        path_v = pornhub_path_v + str(key_) + str(ext)
-        path_j = pornhub_path_j + str(key_) + '.json'
-
-        try:
-            # pass
-            path_i = pornhub_path_i + str(key_) + os.path.splitext(img_)[1]
-        except:
-            # pass
-            path_i = pornhub_path_i + str(key_) + str('.jpg')
-
-            # print(path_v)
-        res = True
-        if url_ == False:
-            # print('找不到網址 :' + str(href_))
-            # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
-            res = False
-            continue
-        elif ext != '.mp4':
-            # print('找不到網址 :' + str(href_))
-            continue
+        _d = h_.find(
+            'div', {'class': 'marker-overlays js-noFade'}).find('var').text.split(':', 1)
+        # print(_d)
+        if int(_d[0]) < 20:
+            print('低於20分')
         else:
+            key_1 = href_.replace('/view_video.php?viewkey=', '')
+            key_ = pas_(href_, 'viewkey')
+            # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
+            # print(str(title_))
+            url_ = parseURL(key_)
+            ##
+            u = urlparse(url_)
+            ext = os.path.splitext(u.path)[1]
+
+            # print(u.path)
+            ##
+            global pornhub_path_v
+            global pornhub_path_j
+            path_v = pornhub_path_v + str(key_) + str(ext)
+            path_j = pornhub_path_j + str(key_) + '.json'
+
+            try:
+                # pass
+                path_i = pornhub_path_i + str(key_) + os.path.splitext(img_)[1]
+            except:
+                # pass
+                path_i = pornhub_path_i + str(key_) + str('.jpg')
+
+                # print(path_v)
             res = True
-            print('找網址 :' + str(href_))
-            do_create_img(img_, path_i)
-            singe_2_download_2json(
-                title_, path_v, path_j, str(url_), str(path_i))
+            if url_ == False:
+                # print('找不到網址 :' + str(href_))
+                # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
+                res = False
+                continue
+            elif ext != '.mp4':
+                # print('找不到網址 :' + str(href_))
+                continue
+            else:
+                res = True
+                print('找網址 :' + str(href_))
+                do_create_img(img_, path_i)
+                singe_2_download_2json(
+                    title_, path_v, path_j, str(url_), str(path_i))
     res = True
     return res
 
@@ -530,6 +546,53 @@ def r3():
     return True
 
 
+def _c_():
+    url = 'https://httpbin.org/ip'
+    for i in range(1, 100):
+        soup = get_soup(url)
+        print(soup)
+
+    return True
+
+
+def _proxy():
+    _url = 'https://www.us-proxy.org/'
+    html = requests.get(_url).content
+    soup = BeautifulSoup(html, 'html.parser')
+    _s = ""
+    _tbody = soup.find('table').find('tbody')
+    for tr in _tbody.find_all('tr'):
+        td_ = tr.find_all('td')
+        if td_[6].text == 'yes':
+            _s = str('https://' + td_[0].text + ':' + td_[1].text)
+            break
+        # print(td_[0].text)
+        # print(td_[1].text)
+        # print(td_[5].text)
+        # print(td_[6].text) # http
+        # print(td_[7].text)
+
+    # json_ = r.json()
+    # LISTA = json_[0]['LISTA']
+    # # print(LISTA)
+    # rand_item = random.choice(LISTA)
+    # while rand_item['ANON'] != 'Elite':
+    #     rand_item = random.choice(LISTA)
+    # # print(rand_item)
+    # return _proxy_(rand_item)
+    # print(json_[0]['LISTA'])
+    # print(_s)
+    return _s
+
+
+def _proxy_(json):
+    # Https = {
+    #     "https":  str('https://' + json['IP'] + ':' + json['PORT'])
+    # }
+    _s = str('https://' + json['IP'] + ':' + json['PORT'])
+    return _s
+
+
 if __name__ == '__main__':
     # 單線程
     # r1()
@@ -537,4 +600,8 @@ if __name__ == '__main__':
     # r2()
     # 多線程 首頁
     r3()
+    # ----------------
+    # _c_()
+    # v = _proxy()
+    # print(v)
     print('run')
