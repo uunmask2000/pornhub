@@ -94,7 +94,7 @@ def get_soup(url, c=1):
     ##
     html = ''
     soup = False
-    print(proxies)
+    # print(proxies)
     while html == '':
         try:
             html = requests.get(url, headers=headers,
@@ -224,12 +224,13 @@ def download(url, filename, chunk_count):
     if os.path.isfile(filename):
         return False
     else:
-        print(str(filename))
+        # print(str(filename))
         proxies = {}
         # proxies['http'] = on_proxies()
         proxies['https'] = _proxy()
-        downloader = Downloader(
-            url, filename, chunk_count,  high_speed=False, headers=None, proxies=proxies)
+        ###
+        # downloader = Downloader(url, filename, chunk_count, high_speed=True, headers=None, proxies=proxies)
+        downloader = Downloader(url, filename, chunk_count)
         downloader.start_sync()
     return True
 
