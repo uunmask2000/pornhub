@@ -31,6 +31,8 @@ Host = "https://www.pornhub.com/view_video.php?viewkey="
 Main_url = 'https://www.pornhub.com/video?o=ht'
 Home_url = 'https://www.pornhub.com/'
 Host_name = 'pornhub'
+##
+_proxy_list = []
 
 # 下載數量
 _movie_row = 0
@@ -56,6 +58,37 @@ def on_proxies():
     return str_
 
 
+def _proxy():
+    global _proxy_list
+    _proxy_list_ = []
+    ####
+    if len(_proxy_list) != 0:
+        _s = random.choice(_proxy_list)
+        return _s
+     ###
+    _url = 'https://www.us-proxy.org/'
+    html = requests.get(_url).content
+    soup = BeautifulSoup(html, 'html.parser')
+    _s = ""
+    _tbody = soup.find('table').find('tbody')
+    _tr = _tbody.find_all('tr')
+    # print(len(_tr))
+    for tr in _tr:
+        # print(tr)
+        # print(len(tr))
+        td_ = tr.find_all('td')
+        # if td_[6].text == 'yes' and td_[4].text == 'anonymous':
+        if td_[6].text == 'yes':
+            _s = str('https://' + td_[0].text + ':' + td_[1].text)
+            _proxy_list_.append(_s)
+    ####
+    _proxy_list = _proxy_list_
+    _s = random.choice(_proxy_list)
+    # _s = random.choice(_proxy_list)
+    # print(_proxy_list)
+    return _s
+
+
 def get_dict(key, dict_):
     new_ = []
     for i in dict_:
@@ -70,6 +103,7 @@ def get_dict(key, dict_):
 
 def get_soup(url, c=1):
     global _error_row
+    global _proxy_list
     # logging.info('get_soup herf' + url)
     # 嚴重錯誤
     if _error_row > 5:
@@ -82,9 +116,10 @@ def get_soup(url, c=1):
     }
     proxies = {}
     # proxies['http'] = on_proxies()
-    proxies['https'] = _proxy()
-    # proxies['https'] = 'https://206.189.165.149:3128'
-
+    var_ = _proxy()
+    proxies['https'] = var_
+    # proxies['https'] = 'https://50.73.137.241'
+    # print(_proxy_list)
     # 錯誤三次
     if c > 3:
         _error_row += 1
@@ -98,11 +133,17 @@ def get_soup(url, c=1):
     # print(proxies)
     while html == '':
         try:
-            html = requests.get(url, headers=headers,
-                                proxies=proxies, timeout=1).content
+            html = requests.get(url, headers=headers, proxies=proxies).content
             soup = BeautifulSoup(html, 'html.parser')
         except:
-            time.sleep(10)
+            time.sleep(1)
+            # 刪除代理
+            try:
+                _proxy_list.remove(var_)
+            except:
+                pass
+
+            # print(proxies)
             # print('重新')
             get_soup(url, c)
             # # print("Was a nice sleep, now let me continue...")
@@ -232,7 +273,9 @@ def download(url, filename, chunk_count):
         proxies['https'] = _proxy()
         ###
         # downloader = Downloader(url, filename, chunk_count, high_speed=True, headers=None, proxies=proxies)
-        downloader = Downloader(url, filename, chunk_count, True)
+        # downloader = Downloader(url, filename, chunk_count, True)
+        downloader = Downloader(
+            url, filename, chunk_count, True, None,  proxies)
         downloader.start_sync()
     return True
 
@@ -262,6 +305,7 @@ def data_list(url):
     print(url)
     soup = get_soup(url)
     if soup == False:
+        print('soup error')
         time.sleep(1)
         # data_list(url)
         return False
@@ -483,7 +527,7 @@ def video_time(file_name):
 
 
 def r1():
-    # guard(1, 1000000)
+    guard(1, 1000000)
     return True
 
 
@@ -560,26 +604,13 @@ def _c_():
     return True
 
 
-def _proxy():
-    _proxy_list = []
-    _url = 'https://www.us-proxy.org/'
-    html = requests.get(_url).content
-    soup = BeautifulSoup(html, 'html.parser')
-    _s = ""
-    _tbody = soup.find('table').find('tbody')
-    _tr = _tbody.find_all('tr')
-    # print(len(_tr))
-    for tr in _tr:
-        # print(tr)
-        # print(len(tr))
-        td_ = tr.find_all('td')
-        if td_[6].text == 'yes' and td_[4].text == 'anonymous':
-            _s = str('https://' + td_[0].text + ':' + td_[1].text)
-            _proxy_list.append(_s)
-    ####
-    _s = random.choice(_proxy_list)
-    # print(_s)
-    return _s
+def r4():
+
+    # https://www.pornhub.com/hd?page=1-X
+    # https://www.pornhub.com/video?c=21?page=1-X
+    # https://www.pornhub.com/video?c=27?page=1-X
+
+    return True
 
 
 if __name__ == '__main__':
