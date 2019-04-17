@@ -40,7 +40,12 @@ _movie_row = 0
 _error_row = 0
 
 
-_s = [111]
+_s = [
+    111,
+    7,
+    13,
+    90
+]
 # -------------------------------
 
 
@@ -538,10 +543,11 @@ def r2():
     __let = _s
     _i = 0
     for rows in __let:
+        _i += 1
         thread = myThread(_i, "Thread-"+str(_i), rows)
         thread.start()
         threads.append(thread)
-        _i += 1
+
     # 创建新线程
     # thread1 = myThread(1, "Thread-1", 1)
     # thread2 = myThread(2, "Thread-2", 2)
@@ -617,9 +623,9 @@ if __name__ == '__main__':
     # 單線程
     # r1()
     # 多線程
-    # r2()
+    r2()
     # 多線程 首頁
-    r3()
+    # r3()
     # ----------------
     # _c_()
     # v = _proxy()
