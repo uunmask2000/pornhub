@@ -136,12 +136,6 @@ def get_soup(url, c=1, __d=0):
         var_ = _proxy()
         proxies['https'] = var_
     if _proxy_count > 50:
-        ##
-        proxies = {}
-        # proxies['http'] = on_proxies()
-        var_ = _proxy()
-        proxies['https'] = var_
-        ##
         _proxy_count = 0
         __d = 0
         _proxy_status = 0
@@ -156,7 +150,7 @@ def get_soup(url, c=1, __d=0):
     soup = False
     # 剩餘數量
     _proxy_list_count = len(_proxy_list)
-    # print(str('剩餘數量')+str(_proxy_list_count))
+    print(str('剩餘數量')+str(_proxy_list_count))
     ###
     if _proxy_list_count == 0 and __d == 1:
         # 暫時不走代理
@@ -171,12 +165,18 @@ def get_soup(url, c=1, __d=0):
         proxies = {}
         _proxy_count += 1
     else:
+        ##
+        proxies = {}
+        # proxies['http'] = on_proxies()
+        var_ = _proxy()
+        proxies['https'] = var_
+        ##
         # print('清空計算器')
         # 清空計算器
         _proxy_count = 0
 
     ##
-    # print(proxies)
+    print(proxies)
     while html == '':
         try:
             html = requests.get(url, headers=headers,
@@ -332,6 +332,10 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
     write_json_file(json_dict_, j_path)
     global _movie_row
     _movie_row += 1
+    # 清潔
+    os.system("cls")
+    print('清空畫面')
+    # 清潔
     print('下載完成' + str(_movie_row))
     return True
 
@@ -355,11 +359,9 @@ def data_list(url):
     # ## videoPreviewBg
     div_wrap = soup.find_all('div', {'class': 'phimage'})
     # print(div_wrap)
-    # print(len(div_wrap))
+    print(len(div_wrap))
     # return True
     ###
-    os.system("cls")
-    print('清空畫面')
     ##
     for h_ in div_wrap:
         href_ = h_.find('a').get('href')

@@ -434,6 +434,10 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
     write_json_file(json_dict_, j_path)
     global _movie_row
     _movie_row += 1
+    # 清潔
+    os.system("cls")
+    print('清空畫面')
+    # 清潔
     print('下載完成' + str(_movie_row))
     return True
 
@@ -457,7 +461,7 @@ def data_list(url):
     # ## videoPreviewBg
     div_wrap = soup.find_all('div', {'class': 'phimage'})
     # print(div_wrap)
-    # print(len(div_wrap))
+    print(len(div_wrap))
     # return True
     for h_ in div_wrap:
         href_ = h_.find('a').get('href')
@@ -509,8 +513,6 @@ def data_list(url):
                 res = True
                 print('找網址 :' + str(href_))
                 do_create_img(img_, path_i)
-                os.system("cls")
-                print('清空畫面')
                 singe_2_download_2json(
                     title_, path_v, path_j, str(url_), str(path_i))
     res = True
