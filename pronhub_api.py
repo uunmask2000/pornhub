@@ -121,7 +121,7 @@ def _proxy():
     return _s
 
 
-def get_soup(url, c=1, __d=0):
+def get_soup(url, c=1, __d=0, _p=0):
     global _error_row
     global _proxy_list
     global _proxy_status
@@ -387,7 +387,8 @@ def parseURL(ph_key, _type=1):
     # 解析
     url = Host + ph_key
     # print(url)
-    dom = requests.get(url).content
+    # dom = requests.get(url).content
+    dom = get_soup(url, 1, 0, 1)
     #     result = re.search(
     #         '"quality":"720","videoUrl":"(.*?)"},', dom.decode("utf-8"))
     try:

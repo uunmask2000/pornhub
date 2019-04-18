@@ -118,7 +118,7 @@ def get_dict(key, dict_):
     return new
 
 
-def get_soup(url, c=1, __d=0):
+def get_soup(url, c=1, __d=0, _p=0):
     # print('get_soup')
     global _error_row
     global _proxy_list
@@ -210,6 +210,8 @@ def get_soup(url, c=1, __d=0):
                 get_soup(url, c)
 
     ###
+    if _p == 1:
+        return html
     return soup
 
 
@@ -285,12 +287,16 @@ def parseURL(ph_key, _type=1):
     # 解析
     url = Host + ph_key
     # print(url)
-    dom = requests.get(url).content
+    # dom = requests.get(url).content
+    dom = get_soup(url, 1, 0, 1)
+    # print(dom.decode("utf-8"))
     #     result = re.search(
     #         '"quality":"720","videoUrl":"(.*?)"},', dom.decode("utf-8"))
+
     try:
-        result = re.search('"videoUrl":"(.*?)"},',
-                           dom.decode("utf-8")).group(1).replace('\\', '')
+        result_ = re.search('"videoUrl":"(.*?)"},', dom.decode("utf-8"))
+        print(result_)
+        result = result_.group(1).replace('\\', '')
         url = str(result)
         return url
     except:
@@ -380,6 +386,7 @@ def data_list(url):
             key_ = pas_(href_, 'viewkey')
             # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
             # print(str(title_))
+
             url_ = parseURL(key_)
             ##
             u = urlparse(url_)
@@ -401,16 +408,16 @@ def data_list(url):
                 # print(path_v)
             res = True
             if url_ == False:
-                # print('找不到網址 :' + str(href_))
+                print('找不到網址1 :' + str(href_))
                 # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
                 res = False
                 continue
             elif ext != '.mp4':
-                # print('找不到網址 :' + str(href_))
+                print('找不到網址 2:' + str(href_))
                 continue
             else:
                 res = True
-                # print('找網址 :' + str(href_))
+                print('找網址 :' + str(href_))
                 do_create_img(img_, path_i)
                 singe_2_download_2json(
                     title_, path_v, path_j, str(url_), str(path_i))
@@ -609,8 +616,8 @@ def r2():
 
 def r3():
     global Home_url
-    Min_t = 500
-    MAX_t = 510
+    Min_t = 10
+    MAX_t = 20
     ##
     threads = []
 
@@ -661,7 +668,7 @@ if __name__ == '__main__':
     print('running')
     _proxy_list_ = []
     # init
-    _proxy
+    # _proxy
     # 單線程
     # r1()
     # 多線程
