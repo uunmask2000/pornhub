@@ -31,8 +31,12 @@ Host = "https://www.pornhub.com/view_video.php?viewkey="
 Main_url = 'https://www.pornhub.com/video?o=ht'
 Home_url = 'https://www.pornhub.com/'
 Host_name = 'pornhub'
-##
+#  代理清單
 _proxy_list = []
+#  切換不走代理
+_proxy_status = 0
+#  切換use次數
+_proxy_count = 0
 
 # 下載數量
 _movie_row = 0
@@ -70,7 +74,9 @@ def _proxy():
     if len(_proxy_list) != 0:
         _s = random.choice(_proxy_list)
         return _s
-     ###
+    else:
+        print('空了')
+    ###
     _url = 'https://www.us-proxy.org/'
     html = requests.get(_url).content
     soup = BeautifulSoup(html, 'html.parser')
@@ -82,13 +88,15 @@ def _proxy():
         # print(tr)
         # print(len(tr))
         td_ = tr.find_all('td')
-        # if td_[6].text == 'yes' and td_[4].text == 'anonymous':
-        if td_[6].text == 'yes':
+        if td_[6].text == 'yes' and td_[4].text == 'anonymous':
+            # if td_[6].text == 'yes':
             _s = str('https://' + td_[0].text + ':' + td_[1].text)
             _proxy_list_.append(_s)
     ####
     _proxy_list = _proxy_list_
     _s = random.choice(_proxy_list)
+    print(_proxy_list)
+    print(_s)
     # _s = random.choice(_proxy_list)
     # print(_proxy_list)
     return _s
@@ -106,16 +114,12 @@ def get_dict(key, dict_):
     return new
 
 
-def get_soup(url, c=1):
+def get_soup(url, c=1, d=0):
     global _error_row
     global _proxy_list
+    global _proxy_status
+    global _proxy_count
     # logging.info('get_soup herf' + url)
-    # 嚴重錯誤
-    if _error_row > 5:
-        # print('嚴重錯誤 大於五次')
-        # os._exit(0)
-        pass
-
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
     }
@@ -123,62 +127,69 @@ def get_soup(url, c=1):
     # proxies['http'] = on_proxies()
     var_ = _proxy()
     proxies['https'] = var_
+
     # proxies['https'] = 'https://50.73.137.241'
     # print(_proxy_list)
     # 錯誤三次
-    if c > 3:
-        _error_row += 1
-        return False
-    else:
-        pass
     c += +1
     ##
     html = ''
     soup = False
+    # 剩餘數量
+    _proxy_list_count = len(_proxy_list)
+    # print(str('剩餘數量')+str(_proxy_list_count))
+    ###
+    if _proxy_list_count == 0 and d == 1:
+        # 暫時不走代理
+        print('暫時不走代理')
+        _proxy_status = 1
+        proxies = {}
+        # _proxy_status
+        # 累積次數
+        _proxy_count += 1
+    elif _proxy_status == 1:
+        print('暫時不走代理')
+        proxies = {}
+        _proxy_count += 1
+    else:
+        # print('清空計算器')
+        # 清空計算器
+        _proxy_count = 0
+
+    ##
     # print(proxies)
     while html == '':
         try:
-            html = requests.get(url, headers=headers, proxies=proxies).content
+            html = requests.get(url, headers=headers,
+                                proxies=proxies, timeout=10).content
             soup = BeautifulSoup(html, 'html.parser')
         except:
             time.sleep(1)
             # 刪除代理
-            try:
-                _proxy_list.remove(var_)
-            except:
-                pass
+            __lows = len(_proxy_list)
+            __lows_c = 0
 
-            # print(proxies)
-            # print('重新')
-            get_soup(url, c)
-            # # print("Was a nice sleep, now let me continue...")
-            continue
-    # try:
-    #     with urllib.request.urlopen(url) as response:
-    #         # use whatever encoding as per the webpage
-    #         html = response.read().decode('utf-8')
-    #         print(html)
-    # except urllib.request.HTTPError as e:
-    #     if e.code == 404:
-    #         print(f"{url} is not found")
-    #     elif e.code == 503:
-    #         print(f'{url} base webservices are not available')
-    #         # can add authentication here
-    #     else:
-    #         print('http error', e)
-    # -----------------------------
-    # html = requests.get(url, headers=headers, proxies=proxies).content
-    # while True:
-    #     soup = BeautifulSoup(html, 'html.parser')
-    #     body = soup.find('body').text
-    #     # print(body)
-    #     if str(body).find('loading...') > 1:
-    #         print(body.text)
-    #         break
-    #     time.sleep(3)
-    #     html = requests.get(url, headers=headers, proxies=proxies).content
-    #     soup = BeautifulSoup(html, 'html.parser')
-    #     # print(soup)
+            while var_ in _proxy_list:
+                if __lows_c >= __lows:
+                    get_soup(url, c, 1)
+                ##
+                _proxy_list.remove(var_)
+                __lows_c += 1
+            # if var_ in _proxy_list:
+            #     print('刪除代理')
+            #     _proxy_list.remove(var_)
+            # else:
+            #     print(var_)
+            #     print(_proxy_list)
+
+            # 判斷
+            if len(_proxy_list) == 0:
+                print('代理1')
+                get_soup(url, c, 1)
+            else:
+                print('代理0')
+                get_soup(url, c)
+    ###
 
     return soup
 
@@ -571,8 +582,8 @@ def r2():
 
 def r3():
     global Home_url
-    Min_t = 15
-    MAX_t = 25
+    Min_t = 1
+    MAX_t = 10
     ##
     threads = []
 
@@ -620,6 +631,9 @@ def r4():
 
 
 if __name__ == '__main__':
+    _proxy_list_ = []
+    # init
+    _proxy
     # 單線程
     # r1()
     # 多線程
