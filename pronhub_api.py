@@ -444,7 +444,7 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
 
 
 def data_list(url):
-    print(url)
+    # print(url)
     soup = get_soup(url)
     if soup == False:
         print('soup error')
@@ -617,7 +617,7 @@ def run_pool_2(x, y):
     Main_url = 'https://www.pornhub.com/video?page={}'
     for r in range(x, y+1):
         _url = Main_url.format(r)
-        print(_url)
+        # print(_url)
         time.sleep(1)
         res = data_list(_url)
     return True
@@ -696,8 +696,8 @@ def r2():
 
 def r3():
     global Home_url
-    Min_t = 20
-    MAX_t = 50
+    Min_t = 10
+    MAX_t = 15
     ##
     threads = []
 
@@ -755,7 +755,10 @@ def get_proxy_list(http=0):
     # 資料
     my_data = {'https': http}
     r = requests.post(api_url, data=my_data)
-    # print(r.content)
+    #####
+    if r.status_code != 200:
+        print('Server Error')
+    ####
     _json = r.content
     try:
         jsons = json.loads(_json)
