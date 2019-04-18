@@ -75,8 +75,10 @@ def _proxy():
         _s = random.choice(_proxy_list)
         return _s
     else:
-        print('空了')
-    ###
+        # print('空了')
+        ###
+        pass
+    #####
     _url = 'https://www.us-proxy.org/'
     html = requests.get(_url).content
     soup = BeautifulSoup(html, 'html.parser')
@@ -88,15 +90,17 @@ def _proxy():
         # print(tr)
         # print(len(tr))
         td_ = tr.find_all('td')
-        if td_[6].text == 'yes' and td_[4].text == 'anonymous':
-            # if td_[6].text == 'yes':
+        # if td_[6].text == 'yes' and td_[4].text == 'anonymous':
+        if td_[6].text == 'yes':
             _s = str('https://' + td_[0].text + ':' + td_[1].text)
             _proxy_list_.append(_s)
     ####
     _proxy_list = _proxy_list_
+    if len(_proxy_list):
+        return ""
     _s = random.choice(_proxy_list)
-    print(_proxy_list)
-    print(_s)
+    # print(_proxy_list)
+    # print(_s)
     # _s = random.choice(_proxy_list)
     # print(_proxy_list)
     return _s
@@ -114,7 +118,8 @@ def get_dict(key, dict_):
     return new
 
 
-def get_soup(url, c=1, d=0):
+def get_soup(url, c=1, __d=0):
+    # print('get_soup')
     global _error_row
     global _proxy_list
     global _proxy_status
@@ -123,10 +128,24 @@ def get_soup(url, c=1, d=0):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
     }
-    proxies = {}
-    # proxies['http'] = on_proxies()
-    var_ = _proxy()
-    proxies['https'] = var_
+
+    if __d == 0:
+        ##
+        proxies = {}
+        # proxies['http'] = on_proxies()
+        var_ = _proxy()
+        proxies['https'] = var_
+    if _proxy_count > 50:
+        ##
+        proxies = {}
+        # proxies['http'] = on_proxies()
+        var_ = _proxy()
+        proxies['https'] = var_
+        ##
+        _proxy_count = 0
+        __d = 0
+        _proxy_status = 0
+        print('本地代理超過50，切換回外部代理')
 
     # proxies['https'] = 'https://50.73.137.241'
     # print(_proxy_list)
@@ -139,7 +158,7 @@ def get_soup(url, c=1, d=0):
     _proxy_list_count = len(_proxy_list)
     # print(str('剩餘數量')+str(_proxy_list_count))
     ###
-    if _proxy_list_count == 0 and d == 1:
+    if _proxy_list_count == 0 and __d == 1:
         # 暫時不走代理
         print('暫時不走代理')
         _proxy_status = 1
@@ -168,7 +187,7 @@ def get_soup(url, c=1, d=0):
             # 刪除代理
             __lows = len(_proxy_list)
             __lows_c = 0
-
+            print('重新獲取')
             while var_ in _proxy_list:
                 if __lows_c >= __lows:
                     get_soup(url, c, 1)
@@ -189,8 +208,8 @@ def get_soup(url, c=1, d=0):
             else:
                 print('代理0')
                 get_soup(url, c)
-    ###
 
+    ###
     return soup
 
 
@@ -283,7 +302,7 @@ def download(url, filename, chunk_count):
     if os.path.isfile(filename):
         return False
     else:
-        print(str(filename))
+        # print(str(filename))
         proxies = {}
         # proxies['http'] = on_proxies()
         proxies['https'] = _proxy()
@@ -318,7 +337,7 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
 
 
 def data_list(url):
-    print(url)
+    # print(url)
     soup = get_soup(url)
     if soup == False:
         print('soup error')
@@ -338,6 +357,10 @@ def data_list(url):
     # print(div_wrap)
     # print(len(div_wrap))
     # return True
+    ###
+    os.system("cls")
+    print('清空畫面')
+    ##
     for h_ in div_wrap:
         href_ = h_.find('a').get('href')
         title_ = h_.find('a').get('title')
@@ -373,7 +396,6 @@ def data_list(url):
             except:
                 # pass
                 path_i = pornhub_path_i + str(key_) + str('.jpg')
-
                 # print(path_v)
             res = True
             if url_ == False:
@@ -386,7 +408,7 @@ def data_list(url):
                 continue
             else:
                 res = True
-                print('找網址 :' + str(href_))
+                # print('找網址 :' + str(href_))
                 do_create_img(img_, path_i)
                 singe_2_download_2json(
                     title_, path_v, path_j, str(url_), str(path_i))
@@ -496,7 +518,7 @@ def run_pool_2(x, y):
     Main_url = 'https://www.pornhub.com/video?page={}'
     for r in range(x, y+1):
         _url = Main_url.format(r)
-        print(_url)
+        # print(_url)
         time.sleep(1)
         res = data_list(_url)
     return True
@@ -528,8 +550,11 @@ def video_time(file_name):
         a = str(check_output('ffprobe -i  "'+file_name +
                              '" 2>&1 |findstr "Duration"', shell=True))
     except:
-        os.remove(file_name)
-        print('刪除')
+        print('檔案刪除')
+        try:
+            os.remove(file_name)
+        except:
+            print('檔案刪除出現異常')
         return 0
     # For Windows
 
@@ -582,8 +607,8 @@ def r2():
 
 def r3():
     global Home_url
-    Min_t = 1
-    MAX_t = 10
+    Min_t = 500
+    MAX_t = 510
     ##
     threads = []
 
@@ -631,17 +656,18 @@ def r4():
 
 
 if __name__ == '__main__':
+    print('running')
     _proxy_list_ = []
     # init
     _proxy
     # 單線程
     # r1()
     # 多線程
-    r2()
+    # r2()
     # 多線程 首頁
-    # r3()
+    r3()
     # ----------------
     # _c_()
     # v = _proxy()
     # print(v)
-    print('run')
+    print('ending')
