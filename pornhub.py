@@ -31,6 +31,9 @@ Host = "https://www.pornhub.com/view_video.php?viewkey="
 Main_url = 'https://www.pornhub.com/video?o=ht'
 Home_url = 'https://www.pornhub.com/'
 Host_name = 'pornhub'
+# 切換本地代理次數
+_切換本地代理次數 = 0
+
 #  代理清單
 _proxy_list = []
 #  切換不走代理
@@ -124,18 +127,29 @@ def get_soup(url, c=1, __d=0, _p=0):
     global _proxy_list
     global _proxy_status
     global _proxy_count
+    global _切換本地代理次數
     # logging.info('get_soup herf' + url)
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
     }
 
+    ###
+    var_ = _proxy()
     if __d == 0:
         ##
         proxies = {}
         # proxies['http'] = on_proxies()
-        var_ = _proxy()
-        proxies['https'] = var_
+
+        if var_ == "":
+            proxies = {}
+        else:
+            proxies['https'] = var_
     if _proxy_count > 50:
+        if _切換本地代理次數 > 10:
+            print('安全停止')
+            sys.exit(1)  
+        ###    
+        _切換本地代理次數 += 1
         _proxy_count = 0
         __d = 0
         _proxy_status = 0
@@ -192,6 +206,8 @@ def get_soup(url, c=1, __d=0, _p=0):
                 if __lows_c >= __lows:
                     get_soup(url, c, 1)
                 ##
+                print('刪除代理' + str(__lows_c))
+                print(var_)
                 _proxy_list.remove(var_)
                 __lows_c += 1
             # if var_ in _proxy_list:
@@ -654,12 +670,43 @@ def _c_():
 
     return True
 
+def run_pool_3(_url , x, y):
+    Main_url = _url + str({})
+    for r in range(x, y+1):
+        _url = Main_url.format(r)
+        # print(_url)
+        time.sleep(1)
+        res = data_list(_url)
+    return True
+
 
 def r4():
 
-    # https://www.pornhub.com/hd?page=1-X
-    # https://www.pornhub.com/video?c=21?page=1-X
-    # https://www.pornhub.com/video?c=27?page=1-X
+    threads = []
+    __list_key = [
+      'https://www.pornhub.com/hd?page=',  
+      'https://www.pornhub.com/video?c=3&page=',  
+      'https://www.pornhub.com/video?c=15&page=', 
+      'https://www.pornhub.com/video?c=16&page=', 
+      'https://www.pornhub.com/video?c=21&page=', 
+      'https://www.pornhub.com/video?c=27&page=',
+      'https://www.pornhub.com/video?c=29&page=',  
+    ]  
+    _s  = 1 
+    _e  = 10
+    
+    ####
+    for _url in __list_key:
+        t = threading.Thread(target=run_pool_3, args=(_url ,_s, _e,))
+        threads.append(t)
+        t.start()
+    for t in threads:
+        t.join()
+    print("退出主线程")
+    while True:
+        pass
+
+    
 
     return True
 
@@ -674,7 +721,9 @@ if __name__ == '__main__':
     # 多線程
     # r2()
     # 多線程 首頁
-    r3()
+    # r3()
+    ## 多線程 + 主題
+    r4()
     # ----------------
     # _c_()
     # v = _proxy()
