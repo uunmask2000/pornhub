@@ -26,7 +26,8 @@ import urllib.request
 
 ###
 # 'https://www.pornhub.com/video?c=111&o=cm&hd=1&max_duration=30&page=2'
-
+# 資料夾路徑
+_path_list = []
 Host = "https://www.pornhub.com/view_video.php?viewkey="
 Main_url = 'https://www.pornhub.com/video?o=ht'
 Home_url = 'https://www.pornhub.com/'
@@ -75,12 +76,20 @@ def _proxy():
     _proxy_list_ = []
     ####
     if len(_proxy_list) != 0:
-        _s = random.choice(_proxy_list)
+        # _s = random.choice(_proxy_list)
+        # print(len(_proxy_list))
+        _s = _proxy_list.pop(0)
+        # print(len(_proxy_list))
         return _s
     else:
-        # print('空了')
-        ###
-        pass
+        print('空了')
+        print(len(_proxy_list))
+        # __EEE = random.randint(1, 10)
+        # print(__EEE)
+        # if __EEE >= 6:
+        #     return {}
+        # ###
+        # pass
     #####
     _url = 'https://www.us-proxy.org/'
     html = requests.get(_url).content
@@ -98,10 +107,15 @@ def _proxy():
             _s = str('https://' + td_[0].text + ':' + td_[1].text)
             _proxy_list_.append(_s)
     ####
+    # print(_proxy_list_)
     _proxy_list = _proxy_list_
-    if len(_proxy_list):
-        return ""
-    _s = random.choice(_proxy_list)
+    if len(_proxy_list_) == 0:
+        return {}
+    # _s = random.choice(_proxy_list)
+    # 利用pop
+    # print(len(_proxy_list))
+    _s = _proxy_list.pop(0)
+    # print(len(_proxy_list))
     # print(_proxy_list)
     # print(_s)
     # _s = random.choice(_proxy_list)
@@ -134,21 +148,27 @@ def get_soup(url, c=1, __d=0, _p=0):
     }
 
     ###
+    ##
+    proxies = {}
+    # proxies['http'] = on_proxies()
     var_ = _proxy()
+    proxies['https'] = var_
+    print(var_)
     if __d == 0:
         ##
-        proxies = {}
         # proxies['http'] = on_proxies()
-
         if var_ == "":
-            proxies = {}
+            print('T1')
+            # proxies = {}
+            print('代理1' + str(len(_proxy_list)))
+            # return get_soup(url, c, 1)
         else:
-            proxies['https'] = var_
+            print('T2')
     if _proxy_count > 50:
         if _切換本地代理次數 > 10:
             print('安全停止')
-            sys.exit(1)  
-        ###    
+            sys.exit(1)
+        ###
         _切換本地代理次數 += 1
         _proxy_count = 0
         __d = 0
@@ -180,50 +200,66 @@ def get_soup(url, c=1, __d=0, _p=0):
         _proxy_count += 1
     else:
         ##
-        proxies = {}
-        # proxies['http'] = on_proxies()
-        var_ = _proxy()
-        proxies['https'] = var_
-        ##
         # print('清空計算器')
         # 清空計算器
         _proxy_count = 0
 
     ##
-    print(proxies)
-    while html == '':
-        try:
-            html = requests.get(url, headers=headers,
-                                proxies=proxies, timeout=10).content
-            soup = BeautifulSoup(html, 'html.parser')
-        except:
-            time.sleep(1)
-            # 刪除代理
-            __lows = len(_proxy_list)
-            __lows_c = 0
-            print('重新獲取')
-            while var_ in _proxy_list:
-                if __lows_c >= __lows:
-                    get_soup(url, c, 1)
-                ##
-                print('刪除代理' + str(__lows_c))
-                print(var_)
-                _proxy_list.remove(var_)
-                __lows_c += 1
-            # if var_ in _proxy_list:
-            #     print('刪除代理')
-            #     _proxy_list.remove(var_)
-            # else:
-            #     print(var_)
-            #     print(_proxy_list)
+    if len(_proxy_list) == 0:
+        print('代理1' + str(len(_proxy_list)))
+        get_soup(url, c, 1)
 
-            # 判斷
-            if len(_proxy_list) == 0:
-                print('代理1')
-                get_soup(url, c, 1)
-            else:
-                print('代理0')
-                get_soup(url, c)
+    try:
+        html_ = requests.get(url, headers=headers, proxies=proxies, timeout=10)
+        html = html_.content
+        soup = BeautifulSoup(html, 'html.parser')
+    except:
+        print('重新獲取')
+        return get_soup(url, c)
+
+    # print(proxies)
+    # while html == '':
+    #     try:
+    #         html_ = requests.get(url, headers=headers,
+    #                              proxies=proxies, timeout=10)
+    #         # print(html_.status_code)
+    #         html = html_.content
+    #         time.sleep(1)
+    #         soup = BeautifulSoup(html, 'html.parser')
+    #         # print(soup)
+    #         _se = soup.find('body').text.strip().replace("", "")
+    #         print(_se)
+    #         # addlist
+    #         _proxy_list.append(var_)
+    #     except:
+    #         time.sleep(1)
+    #         # 刪除代理
+    #         __lows = len(_proxy_list)
+    #         __lows_c = 0
+    #         print('重新獲取')
+    #         # while var_ in _proxy_list:
+    #         #     if __lows_c >= __lows:
+    #         #         get_soup(url, c, 1)
+    #         #     ##
+    #         #     # print('刪除代理' + str(__lows_c))
+    #         #     # print(var_)
+    #         #     _proxy_list.remove(var_)
+    #         #     __lows_c += 1
+    #         # if var_ in _proxy_list:
+    #         #     print('刪除代理')
+    #         #     _proxy_list.remove(var_)
+    #         # else:
+    #         #     print(var_)
+    #         #     print(_proxy_list)
+
+    #         # 判斷
+    #         # print(_proxy_list)
+    #         if len(_proxy_list) == 0:
+    #             print('代理1' + str(len(_proxy_list)))
+    #             get_soup(url, c, 1)
+    #         else:
+    #             print('代理0' + str(len(_proxy_list)))
+    #             get_soup(url, c)
 
     ###
     if _p == 1:
@@ -311,7 +347,7 @@ def parseURL(ph_key, _type=1):
 
     try:
         result_ = re.search('"videoUrl":"(.*?)"},', dom.decode("utf-8"))
-        print(result_)
+        # print(result_)
         result = result_.group(1).replace('\\', '')
         url = str(result)
         return url
@@ -321,18 +357,20 @@ def parseURL(ph_key, _type=1):
 
 def download(url, filename, chunk_count):
     # print(str(url) + str(filename))
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
+    }
     if os.path.isfile(filename):
         return False
     else:
-        # print(str(filename))
+        print(str(filename))
         proxies = {}
         # proxies['http'] = on_proxies()
         proxies['https'] = _proxy()
+        # print(proxies)
         ###
-        # downloader = Downloader(url, filename, chunk_count, high_speed=True, headers=None, proxies=proxies)
-        # downloader = Downloader(url, filename, chunk_count, True)
-        downloader = Downloader(
-            url, filename, chunk_count, True, None,  proxies)
+        # downloader = Downloader(url, filename, chunk_count, True, headers, proxies)
+        downloader = Downloader(url, filename, chunk_count, True)
         downloader.start_sync()
     return True
 
@@ -347,7 +385,7 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
     json_dict_['cover_url'] = i_path
     json_dict_['source_url_old'] = url
     # 下載影片
-    download(url, V_path,  random.randint(5, 10))
+    download(url, V_path, 10)
     # 檢查 影片
     json_dict_['mins'] = video_time(V_path)
     # 下載json
@@ -365,20 +403,6 @@ def singe_2_download_2json(title, V_path, j_path, url, i_path=''):
 def data_list(url):
     # print(url)
     soup = get_soup(url)
-    if soup == False:
-        print('soup error')
-        time.sleep(1)
-        # data_list(url)
-        return False
-    # print(soup)
-    _se = soup.find('body').text.strip().replace("", "")
-    # print(_se)
-    _ss = 'Loading ...'
-    if _se == _ss:
-        print('異常')
-        # raise Exception('異常')
-        sys.exit(0)
-    # ## videoPreviewBg
     div_wrap = soup.find_all('div', {'class': 'phimage'})
     # print(div_wrap)
     print(len(div_wrap))
@@ -393,10 +417,12 @@ def data_list(url):
             'div', {'class': 'marker-overlays js-noFade'}).find('var').text.split(':', 1)
         # print(_d)
         if int(_d[0]) < 5:
-            pass
-            # print('低於5分')
+            # pass
+            print('低於5分')
+            continue
         elif int(_d[0]) > 90:
-            pass
+            print('高於90分')
+            continue
         else:
             key_1 = href_.replace('/view_video.php?viewkey=', '')
             key_ = pas_(href_, 'viewkey')
@@ -405,15 +431,15 @@ def data_list(url):
 
             url_ = parseURL(key_)
             ##
-            u = urlparse(url_)
-            ext = os.path.splitext(u.path)[1]
-
-            # print(u.path)
-            ##
-            global pornhub_path_v
-            global pornhub_path_j
-            path_v = pornhub_path_v + str(key_) + str(ext)
-            path_j = pornhub_path_j + str(key_) + '.json'
+            # _v_v = str(_path_list[0]) + str(_key) + str('.mp4')
+            # _v_j = str(_path_list[1]) + str(_key) + str('.json')
+            # _v_i = str(_path_list[2]) + str(_key) + str('.jpg')
+            # global pornhub_path_v
+            # global pornhub_path_j
+            global _path_list
+            pornhub_path_v = str(_path_list[0])
+            pornhub_path_j = str(_path_list[1])
+            pornhub_path_i = str(_path_list[2])
 
             try:
                 # pass
@@ -428,15 +454,22 @@ def data_list(url):
                 # print(str(href_) + ' : ' + str(title_) + ' : ' + str(key_))
                 res = False
                 continue
-            elif ext != '.mp4':
-                print('找不到網址 2:' + str(href_))
-                continue
             else:
-                res = True
-                print('找網址 :' + str(href_))
-                do_create_img(img_, path_i)
-                singe_2_download_2json(
-                    title_, path_v, path_j, str(url_), str(path_i))
+                u = urlparse(url_)
+                ext = os.path.splitext(u.path)[1]
+                if ext != '.mp4':
+                    print('找不到網址 2:' + str(href_))
+                    continue
+                else:
+                    res = True
+                    print('找網址 :' + str(href_))
+                    ###
+                    path_v = pornhub_path_v + str(key_) + str(ext)
+                    path_j = pornhub_path_j + str(key_) + '.json'
+                    ##
+                    do_create_img(img_, path_i)
+                    singe_2_download_2json(
+                        title_, path_v, path_j, str(url_), str(path_i))
     res = True
     return res
 
@@ -461,34 +494,34 @@ def pas_(url, key):
 
 # ------------------------------------------------------------------------------
 # 先建立資料夾
-path = 'path/'
-mkdir_m(path)
-###
-now_date = datetime.datetime.now().strftime("%Y%m%d")
-path = 'path/' + now_date + '/'
-mkdir_m(path)
+# path = 'path/'
+# mkdir_m(path)
+# ###
+# now_date = datetime.datetime.now().strftime("%Y%m%d")
+# path = 'path/' + now_date + '/'
+# mkdir_m(path)
 
-pathJ = path + 'jsons/'
-mkdir_m(pathJ)
-pathV = path + 'videos/'
-mkdir_m(pathV)
-pathI = path + 'images/'
-mkdir_m(pathI)
+# pathJ = path + 'jsons/'
+# mkdir_m(pathJ)
+# pathV = path + 'videos/'
+# mkdir_m(pathV)
+# pathI = path + 'images/'
+# mkdir_m(pathI)
 
-###
-pornhub_path_v_ = path + 'videos/' + Host_name + '/'
-mkdir_m(pornhub_path_v_)
-pornhub_path_j_ = path + 'jsons/' + Host_name + '/'
-mkdir_m(pornhub_path_j_)
-pornhub_path_i_ = path + 'images/' + Host_name + '/'
-mkdir_m(pornhub_path_i_)
+# ###
+# pornhub_path_v_ = path + 'videos/' + Host_name + '/'
+# mkdir_m(pornhub_path_v_)
+# pornhub_path_j_ = path + 'jsons/' + Host_name + '/'
+# mkdir_m(pornhub_path_j_)
+# pornhub_path_i_ = path + 'images/' + Host_name + '/'
+# mkdir_m(pornhub_path_i_)
 
-pornhub_path_v = pornhub_path_v_
-mkdir_m(pornhub_path_v)
-pornhub_path_j = pornhub_path_j_
-mkdir_m(pornhub_path_j)
-pornhub_path_i = pornhub_path_i_
-mkdir_m(pornhub_path_i)
+# pornhub_path_v = pornhub_path_v_
+# mkdir_m(pornhub_path_v)
+# pornhub_path_j = pornhub_path_j_
+# mkdir_m(pornhub_path_j)
+# pornhub_path_i = pornhub_path_i_
+# mkdir_m(pornhub_path_i)
 
 # 評到
 chanel = 105
@@ -585,6 +618,7 @@ def video_time(file_name):
 
     # For Linux
     # a = str(check_output('ffprobe -i  "'+file_name+'" 2>&1 |grep "Duration"',shell=True))
+    print('檔案OK')
     a = a.split(",")[0].split("Duration:")[1].strip()
     h, m, s = a.split(':')
     duration = int(h) * 3600 + int(m) * 60 + float(s)
@@ -670,13 +704,21 @@ def _c_():
 
     return True
 
-def run_pool_3(_url , x, y):
+
+def run_pool_3(_url, x, y):
     Main_url = _url + str({})
-    for r in range(x, y+1):
-        _url = Main_url.format(r)
-        # print(_url)
-        time.sleep(1)
+    page_ = 1
+    while True:
+        page_ += 1
+        _url = Main_url.format(page_)
+        print(_url)
+        time.sleep(2)
         res = data_list(_url)
+    # for r in range(x, y+1):
+    #     _url = Main_url.format(r)
+    #     # print(_url)
+    #     time.sleep(1)
+    #     res = data_list(_url)
     return True
 
 
@@ -684,21 +726,22 @@ def r4():
 
     threads = []
     __list_key = [
-      'https://www.pornhub.com/hd?page=',  
-      'https://www.pornhub.com/video?c=3&page=',  
-      'https://www.pornhub.com/video?c=15&page=', 
-      'https://www.pornhub.com/video?c=16&page=', 
-      'https://www.pornhub.com/video?c=21&page=', 
-      'https://www.pornhub.com/video?c=27&page=',
-      'https://www.pornhub.com/video?c=29&page=',  
-    ]  
-    _s  = 1 
-    _e  = 10
-    
+        # 'https://www.pornhub.com/hd?page=',
+        'https://www.pornhub.com/video?c=3&page=',
+        'https://www.pornhub.com/video?c=15&page=',
+        'https://www.pornhub.com/video?c=16&page=',
+        # 'https://www.pornhub.com/video?c=21&page=',
+        # 'https://www.pornhub.com/video?c=27&page=',
+        # 'https://www.pornhub.com/video?c=29&page=',
+    ]
+    _s = 25
+    _e = 50
+
     ####
     for _url in __list_key:
-        t = threading.Thread(target=run_pool_3, args=(_url ,_s, _e,))
+        t = threading.Thread(target=run_pool_3, args=(_url, _s, _e,))
         threads.append(t)
+        t.setName(_url)
         t.start()
     for t in threads:
         t.join()
@@ -706,24 +749,51 @@ def r4():
     while True:
         pass
 
-    
-
     return True
+
+
+def _init_(Host_name):
+    global _path_list
+    # 先建立資料夾
+    path = 'path/'
+    mkdir_m(path)
+    ###
+    now_date = datetime.datetime.now().strftime("%Y%m%d")
+    path = 'path/' + now_date + '/'
+    mkdir_m(path)
+
+    _p = path  + '/' +  Host_name + '/'
+    mkdir_m(_p)
+
+    _let_key = [
+        'videos/',
+        'jsons/',
+        'images/'
+    ]
+
+    for _a in _let_key:
+        _s = _p + _a
+        mkdir_m(_s)
+        ##
+        _path_list.append(_s)
+    return _path_list
 
 
 if __name__ == '__main__':
     print('running')
+    # 初始化
+    _init_(Host_name)
     _proxy_list_ = []
     # init
     # _proxy
     # 單線程
-    # r1()
+    r1()  # 有問題嘞
     # 多線程
-    # r2()
+    # r2() 有問題了
     # 多線程 首頁
-    # r3()
-    ## 多線程 + 主題
-    r4()
+    # r3()  有問題嘞
+    # 多線程 + 主題
+    # r4()
     # ----------------
     # _c_()
     # v = _proxy()
