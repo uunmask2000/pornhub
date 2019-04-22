@@ -38,7 +38,7 @@ class Cofig:
             self.mkdir_m(_s)
             ##
             self._path_list.append(_s)
-        print(self._path_list)
+        # print(self._path_list)
 
     def get_path_list(self,):
         #####
