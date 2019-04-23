@@ -14,7 +14,7 @@ class Cofig:
         # 先建立資料夾
         self._path_list = _path_list
         self.Host_name = Host_name
-        self.path = path
+        self.path = path + '/'
         # -----------------------------------------------------
         path = self.path
         self.mkdir_m(path)
@@ -25,6 +25,7 @@ class Cofig:
         self.mkdir_m(path)
 
         _p = path + Host_name + '/'
+        # print(_p)
         self.mkdir_m(_p)
 
         _let_key = [
@@ -63,14 +64,14 @@ class Cofig:
         return sign
 
     def mkdir_m(self, Path):
-        _path = './path'
-        # 檢查目錄是否存在
-        if os.path.isdir(_path):
-            # print("目錄存在。")
-            pass
-        else:
-            # print("目錄不存在。")
-            os.mkdir(_path)
+        # _path = './path'
+        # # 檢查目錄是否存在
+        # if os.path.isdir(_path):
+        #     # print("目錄存在。")
+        #     pass
+        # else:
+        #     # print("目錄不存在。")
+        #     os.mkdir(_path)
 
         # os.mkdir(Path)
         # 檢查目錄是否存在
@@ -88,20 +89,23 @@ class Cofig:
             'time': "",  # 時間
             'sig': "",  # 加蜜
             'name': "",  # Title
-            'area': "",
-            'cate': "",  # 分類
+            'area': "adult",
+            'cate': "國產",  # 分類
             'year': "2019",
             'director': "",
             'actor': "",
-            'type': "",
-            'total': "",
+            'type': "movie",
+            'total': "1",
             'cover_url': "",  # 封面
             'grade': "",  # 分數
             'mins': "",
             'source_url': "",
-            'source_url_old': "",
             'resolution': "",
             'part': "",
-            'intro': ""
+            'intro': "",
+            ####
+            'source_url_old': "",
+            'cover_url_old': "",
         }
+
         return post_dict
