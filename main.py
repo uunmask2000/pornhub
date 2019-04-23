@@ -15,6 +15,8 @@ from selenium.webdriver.chrome.options import Options
 import requests
 import time
 from bs4 import BeautifulSoup
+# ###############################################
+import threading
 
 
 # ###############################################
@@ -60,6 +62,7 @@ def _web_(___url):
         soup = BeautifulSoup(html, 'html.parser')
     except:
         pass
+    web.close()
 
     return soup
 
@@ -182,6 +185,20 @@ def write_json_file(post_dict_, path):
     return True
 
 
+def R1(_A):
+    threads = []
+    for item in _A:
+        t = threading.Thread(target=list_page, args=(item,))
+        threads.append(t)
+        t.setName(item)
+        t.start()
+    #########
+    for t in threads:
+        t.join()
+    print("退出主线程")
+    return True
+
+
 # 設定
 Cofig = Cofig.Cofig(path='path', Host_name='www_yzz13_com')
 Bssoup = Bssoup.Bssoup()
@@ -195,10 +212,4 @@ _json_dict = Cofig.json_dict()
 
 ##
 _A = run_pool()
-for item in _A:
-    list_page(item)
-
-
-# print(_A)
-# __url = 'http://www.yzz13.com/?mode=async&function=get_block&block_id=list_videos_most_recent_videos&sort_by=post_date&from=11'
-# list_page(__url)
+R1(_A)
