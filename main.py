@@ -50,6 +50,9 @@ def _web_(___url):
     chrome_path = "chromedriver.exe"
     chrome_options = Options()
     chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--hide-scrollbars')
+    # chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument("--log-level=3")  # fatal
     web = webdriver.Chrome(chrome_path, chrome_options=chrome_options)
     web.get(___url)
     try:
@@ -79,6 +82,7 @@ def stie_page(___url):
         print('錯誤')
         return False
     ###
+    _json_dict['intro'] = ___url
     _json_dict['time'] = Cofig.create_time()
     _json_dict['sig'] = Cofig.create_sign(_json_dict['time'])
 
@@ -95,6 +99,8 @@ def stie_page(___url):
     _json_dict['cover_url_old'] = _img_src
 
     # print(h1_)
+    if len(h1_) >= 20:
+        h1_ = h1_[:20]
     _v_name = str(_path_list[0]) + \
         CustomEncryption.b16_encode(h1_) + str('.mp4')
     _s_name = str(_path_list[1]) + \
@@ -106,7 +112,7 @@ def stie_page(___url):
     _json_dict['cover_url'] = _i_name
 
     # 影片下載
-    demo_(video_src, _v_name)
+    download_(video_src, _v_name)
     # 圖片下載
     do_create_img(_img_src, _i_name)
     # json 產生
@@ -134,22 +140,25 @@ def list_page(__url):
     return True
 
 
-def demo_(url, path):
+def download_(url, path):
     print('start  ：')
-    # 当把get函数的stream参数设置成False时，
-    # 它会立即开始下载文件并放到内存中，如果文件过大，有可能导致内存不足。
-    # 当把get函数的stream参数设置成True时，它不会立即开始下载，
-    # 使用iter_content或iter_lines遍历内容或访问内容属性时才开始下载
-    r = requests.get(url, stream=True)
-    f = open(path, "wb")
     start = time.time()
-    for chunk in r.iter_content(chunk_size=1024*1024):
-        if chunk:
-            f.write(chunk)
-            f.flush()
-            # iter_content：一块一块的遍历要下载的内容
-            # iter_lines：一行一行的遍历要下载的内容
-            # 这两个函数下载大文件可以防止占用过多的内存，因为每次只下载小部分数据
+    if os.path.isfile(path):
+        print('檔案存在')
+    else:
+        # 当把get函数的stream参数设置成False时，
+        # 它会立即开始下载文件并放到内存中，如果文件过大，有可能导致内存不足。
+        # 当把get函数的stream参数设置成True时，它不会立即开始下载，
+        # 使用iter_content或iter_lines遍历内容或访问内容属性时才开始下载
+        r = requests.get(url, stream=True)
+        f = open(path, "wb")
+        for chunk in r.iter_content(chunk_size=1024*1024):
+            if chunk:
+                f.write(chunk)
+                f.flush()
+                # iter_content：一块一块的遍历要下载的内容
+                # iter_lines：一行一行的遍历要下载的内容
+                # 这两个函数下载大文件可以防止占用过多的内存，因为每次只下载小部分数据
     end = time.time()
     print('Finish in ：', end - start)
     return True
