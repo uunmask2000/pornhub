@@ -7,6 +7,7 @@ import Coffig
 import Check_video_mins
 import Video_API
 #####
+import re
 import time
 import os
 from urllib.request import urlretrieve
@@ -46,6 +47,7 @@ _home_name = ''
 
 ####
 downloads = 0
+error = 0
 
 
 def _web_(___url):
@@ -59,41 +61,35 @@ def _web_(___url):
     ####
     chrome_path = "chromedriver.exe"
     chrome_options = Options()
+    chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--hide-scrollbars')
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--log-level=3")  # fatal
+    chrome_options.add_argument('lang=zh_CN.UTF-8')
+    chrome_options.add_experimental_option(
+        "prefs",  {"profile.managed_default_content_settings.images": 2})
 
-    try:
-        web = webdriver.Chrome(chrome_path, chrome_options=chrome_options)
-        web.get(___url)
-        time.sleep(1)
-        # kt_player  onclik
-        web.find_element_by_id('kt_player').click()
-        # i-play  onclik
-        # driver.find_element_by_css_selector('.i-play').click()
-
-        # time.sleep(1)
-        # web.execute_script('load_player()')
-        time.sleep(30)
-        # time.sleep(5)
-        # web.find_element_by_class_name('skip_button').click()
-        # # time.sleep(300)
-        # time.sleep(10)
-
-    except:
+    # try:
+    web = webdriver.Chrome(chrome_path, chrome_options=chrome_options)
+    web.get(___url)
+    time.sleep(1)
+    web.find_element_by_id('kt_player').click()
+    time.sleep(1)
+    html = web.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+    # a fp-play
+    _href = soup.find('a', {'id': 'download_text_link_2'}).get('href')
+    if _href is None:
         web.quit()
-        print('error')
         return _web_(___url)
-    try:
-        time.sleep(5)
-        html = web.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-        web.quit()
-    except:
-        # pass
-        web.quit()
-
+        # print(soup)
+        # web.quit()
+    # except:
+    #     print('')
+        # return _web_(___url)
+        # web.quit()
+    # time.sleep(45)
     web.quit()
     return soup
 
@@ -131,6 +127,7 @@ def _sigle__page(_url):
     global _path_list
     global _json_dict
     global downloads
+    global error
     '''
     _let_key = [
     'videos/',
@@ -144,12 +141,13 @@ def _sigle__page(_url):
         print('錯誤')
         return False
 
-    # print(soup)
-    video_src = soup.find(
-        'div', {'class': 'fp-player'}).find('video').get('src')
-    # video_src = div.find('video').get('src')
-    # print(video_src)
-    # return True
+    # fp-time-elapsed
+    # div_time = soup.find('div', {'class': 'fp-time-elapsed'}).text
+    ##
+    # if div_time == '00:00':
+    #     print(div_time)
+    #     print('影片有問題')
+    #     return True
     ###
     _json_dict['intro'] = _url
     _json_dict['time'] = Cofig.create_time()
@@ -162,9 +160,20 @@ def _sigle__page(_url):
     _img_src = soup.find("meta",  property="og:image").get('content')
     # print(_img_src)
     # print(soup)
-    video_src = soup.find(
-        'div', {'class': 'fp-player'}).find('video').get('src')
+    # video_src = soup.find('div', {'class': 'fp-player'}).find('video').get('src')
+    video_src = soup.find('a', {'id': 'download_text_link_2'}).get('href')
     # print(video_src)
+    if re.search('https://www.3movs.com/get_file', video_src) is None:
+        error += 1
+        if error > 1:
+            print('影片有問題')
+            return True
+        else:
+            print('重新爬取', _url)
+            ####
+            return _sigle__page(_url)
+    # if video_src.re('https://www.3movs.com/get_file')
+    # a = 1
     # --------------------------------
     _json_dict['name'] = title_
     _json_dict['source_url_old'] = video_src
@@ -198,6 +207,7 @@ def _sigle__page(_url):
     ##
     MSG = Video_API.apiCrawlingEnd(_url, RES['data']['video_dl_id'])
     print('影片下載完畢', MSG)
+    time.sleep(5)
 
     return True
 
@@ -219,9 +229,20 @@ def list_data(_url):
 
     return True
 
+
 # __url = 'https://www.3movs.com/videos/133597/small-titted-lovenia-lux-gets-her-anus-destroyed/'
 # _sigle__page(__url)
+page = 1
+while True:
+    page += 1
+    __url = 'https://www.3movs.com/videos/{}/'
+    # __url = 'https://www.3movs.com/categories/teen/{}/'
+    list_data(__url.format(page,))
 
 
-__url = 'https://www.3movs.com/videos/1/'
-list_data(__url)
+# __url = 'https://www.3movs.com/videos/1/'
+# list_data(__url)
+
+# _v_name = 'path/20190507/3movs/videos/4275737479206272756E65747465204D494C4620.mp4'
+# _video_time = Check_video_mins.video_time(_v_name)
+# print(_video_time)

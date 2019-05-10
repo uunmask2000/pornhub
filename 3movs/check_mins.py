@@ -5,18 +5,19 @@ import Cofig
 ###
 Check_video_mins = Check_video_mins.Check_video_mins()
 # 設定
-Cofig = Cofig.Cofig(path='path', Host_name='7msp1')
+Cofig = Cofig.Cofig(path='path', Host_name='3movs')
 
 
 def __init__():
     json_ = glob.glob('path/**/**/*.json', recursive=True)
-    # print(json_)
+    print(json_)
     for _l in json_:
         print(_l)
         with open(_l) as f:
             data = json.load(f)
             _source_url = data['source_url']
             _video_time = Check_video_mins.video_time(_source_url)
+            print(data)
             if _video_time:
                 data['mins'] = int(_video_time)
                 print(data)

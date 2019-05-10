@@ -24,4 +24,4 @@ class Check_video_mins:
         h, m, s = a.split(':')
         duration = int(h) * 3600 + int(m) * 60 + float(s)
         # print(duration)
-        return int(duration/60)
+        return int(duration)
